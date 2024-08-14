@@ -39,6 +39,13 @@ async def help(message:Message):
 async def start(message:Message):
     await message.answer('Приветики! Я бот:)')
 
+# @dp.message()
+# async def empty(message: Message):
+#     await message.answer("Я бот, я не умею обрабатывать такие сообщения.")
+
+@dp.message()
+async def echo(message: Message):
+    await message.send_copy(chat_id=message.chat.id)
 async def main():
     await dp.start_polling(bot)
 

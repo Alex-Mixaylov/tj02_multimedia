@@ -20,58 +20,10 @@ import os
 
 load_dotenv()
 TOKEN = os.getenv('TOKEN')
-IMAP_SERVER = os.getenv('IMAP_SERVER')
-EMAIL = os.getenv('EMAIL')
-PASSWORD = os.getenv('PASSWORD')
+
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
-
-# получение exel документов с почты email
-
-def fetch_email_attachment():
-    # Подключение к почтовому серверу
-    mail = imaplib.IMAP4_SSL(IMAP_SERVER)
-    mail.login(EMAIL, PASSWORD)
-
-    # Выбор папки для работы
-    mail.select("inbox")
-
-    # Поиск всех писем
-    status, messages = mail.search(None, "ALL")
-
-    # Получение списка писем
-    email_ids = messages[0].split()
-
-    for email_id in email_ids:
-        # Получение конкретного письма
-        status, msg_data = mail.fetch(email_id, "(RFC822)")
-        for response_part in msg_data:
-            if isinstance(response_part, tuple):
-                msg = email.message_from_bytes(response_part[1])
-                subject, encoding = decode_header(msg["Subject"])[0]
-                if isinstance(subject, bytes):
-                    subject = subject.decode(encoding if encoding else 'utf-8')
-
-                # Проверка на определённый текст в теме письма
-                if "Excel Report" in subject:  # Измените "Excel Report" на нужный вам текст
-                    # Проверка на вложение
-                    if msg.is_multipart():
-                        for part in msg.walk():
-                            content_disposition = str(part.get("Content-Disposition"))
-                            if "attachment" in content_disposition:
-                                # Сохранение файла
-                                filename = part.get_filename()
-                                if filename and (filename.endswith(".xlsx") or filename.endswith(".xls")):
-                                    filepath = os.path.join("tmp", filename)
-                                    with open(filepath, "wb") as f:
-                                        f.write(part.get_payload(decode=True))
-
-                                    # Возвращаем путь к файлу для дальнейшей обработки
-                                    return filepath
-
-    mail.logout()
-    return None
 
 
 # обработка загрузки exel файла
